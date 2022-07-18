@@ -20,6 +20,12 @@ bl_info = {
 def camera_poll(self, object):
     return object.type == 'CAMERA'
 
+class InputComponent(bpy.types.PropertyGroup):
+    isSwitchCameraView: bpy.props.BoolProperty(
+        name="Switch camera view",
+        default=False
+    )
+
 class UI_PT_Panel(bpy.types.Panel):
     bl_label = "Switch Active Camera Numpad"
     bl_category = "View"
@@ -28,6 +34,11 @@ class UI_PT_Panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+
+        # 操作時カメラビューに切り替えるチェック
+        layout.prop(context.scene.imput_component, 'isSwitchCameraView')
+
+        # カメラ選択フォーム
         row1 = layout.row()
         # row1.alignment = 'LEFT'
         row1.label(text="Num7")
@@ -186,6 +197,9 @@ def switch_camera(self, camera_num):
     if camera_obj is None:
         return
     bpy.context.scene.camera = camera_obj
+    
+    if bpy.context.scene.imput_component.isSwitchCameraView:
+        bpy.context.space_data.region_3d.view_perspective = 'CAMERA'
 
 classes = (
     SwitchSceneCamera0,
@@ -198,6 +212,7 @@ classes = (
     SwitchSceneCamera7,
     SwitchSceneCamera8,
     SwitchSceneCamera9,
+    InputComponent,
     UI_PT_Panel,
 )
 
@@ -229,6 +244,7 @@ def register():
             addon_keymaps.append((km, kmi))
     for num in range(10):
         setattr(bpy.types.Scene, 'camera_obj_Num' + str(num), PointerProperty(type=bpy.types.Object, poll=camera_poll))
+    bpy.types.Scene.imput_component = bpy.props.PointerProperty(type=InputComponent)
     print("SwitchActiveCamera is registered.")
 
 def unregister():
@@ -240,6 +256,7 @@ def unregister():
     for num in range(10):
         camera_obj_Num = getattr(bpy.types.Scene, 'camera_obj_Num' + str(num))
         del camera_obj_Num
+    del bpy.types.Scene.imput_component
     print("SwitchActiveCamera is unregistered.")
 
 if __name__ == "__main__":
