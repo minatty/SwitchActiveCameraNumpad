@@ -1,0 +1,2 @@
+# SwitchActiveCameraNumpad
+blender addon SwitchActiveCameraNumpad
